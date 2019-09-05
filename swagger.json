@@ -1,0 +1,104 @@
+{
+    "swagger" : "2.0",
+    "info" : {
+      "description" : "This API controls all backend functions for a web-based clicker program\n",
+      "version" : "1.0.0",
+      "title" : "Clicker"
+    },
+    "host" : "virtserver.swaggerhub.com",
+    "basePath" : "/anshulmodh/clicker/1.0.0",
+    "schemes" : [ "https" ],
+    "paths" : {
+      "/createClass" : {
+        "post" : {
+          "summary" : "Create a new class and return a unique class code",
+          "consumes" : [ "application/json" ],
+          "produces" : [ "application/json" ],
+          "parameters" : [ ],
+          "responses" : {
+            "201" : {
+              "description" : "Success, class created"
+            }
+          }
+        }
+      },
+      "/poll" : {
+        "post" : {
+          "summary" : "Change the status of the poll",
+          "consumes" : [ "application/json" ],
+          "produces" : [ "application/json" ],
+          "parameters" : [ {
+            "name" : "pollStatus",
+            "in" : "body",
+            "required" : true,
+            "type" : "boolean"
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "successful operation"
+            }
+          }
+        }
+      },
+      "/report" : {
+        "get" : {
+          "summary" : "Get report of student answers",
+          "produces" : [ "application/json" ],
+          "parameters" : [ ],
+          "responses" : {
+            "200" : {
+              "description" : "successful operation"
+            }
+          }
+        }
+      },
+      "/visualize" : {
+        "get" : {
+          "summary" : "return graph data of student answers",
+          "produces" : [ "application/json" ],
+          "parameters" : [ ],
+          "responses" : {
+            "200" : {
+              "description" : "successful operation"
+            }
+          }
+        }
+      },
+      "/answer" : {
+        "post" : {
+          "summary" : "post answer to host question",
+          "parameters" : [ {
+            "in" : "body",
+            "name" : "answerPayload",
+            "description" : "The user to create.",
+            "required" : false,
+            "schema" : {
+              "$ref" : "#/definitions/answerPayload"
+            }
+          } ],
+          "responses" : {
+            "201" : {
+              "description" : "successful operation"
+            }
+          }
+        }
+      }
+    },
+    "definitions" : {
+      "answerPayload" : {
+        "type" : "object",
+        "required" : [ "answer", "classCode", "username" ],
+        "properties" : {
+          "classCode" : {
+            "type" : "string"
+          },
+          "username" : {
+            "type" : "string"
+          },
+          "answer" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
