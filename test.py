@@ -1,7 +1,9 @@
-import requests
-import json
+import pymongo
+from pymongo import MongoClient
 
-payload = {'status':True}
+client = MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
+db = client['clicker'] 
+collection = db['clicker']
 
-r = requests.post(url="http://localhost:5000/poll", verify=False, data=payload)
-print(r.json())
+post = {"_id": "fkdslarel324k32", "type": "class", "code": "fdkasfs", "status": False}
+collection.insert_one(post)
