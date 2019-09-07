@@ -81,9 +81,37 @@ class deleteUser(Resource):
             collection.update({"_id": 0}, {"$pull": {"names": username}})
             for tag in ids.keys():
                 collection.update({"_id": 0}, {"$pull": {"ids": tag}})
-            return 200
         except Exception as e:
             return str(e)
+        return 200
+
+class deleteClass(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', required=True)
+        parser.add_argument('className', required=True)
+        args = parser.parse_args()
+        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
+        db = client['clicker']
+        return self.deleteClass(args['user'], args['className'], db)
+
+    def deleteClass(self, username, className, db):
+        mapping = db['mapping']
+        classes = db['classes']
+        collection = db['ids']
+        try:
+            ids = mapping.find_one({"_id":username})['Classes']
+            for tag in ids.keys():
+                if ids.get(tag) == className:
+                    targetId = tag
+                    break
+            mapping.update({"_id": username}, {"$unset": {"Classes." + str(targetId): ""}})
+            results = classes.delete_one({"_id": targetId})
+            collection.update({"_id": 0}, {"$pull": {"ids": targetId}})
+        except Exception as e:
+            return str(e)
+        return 200
 
 api.add_resource(createClass, '/createClass')
 api.add_resource(deleteUser, '/deleteUser')
+api.add_resource(deleteClass, '/deleteClass')
