@@ -112,6 +112,48 @@ class deleteClass(Resource):
             return str(e)
         return 200
 
+class pollStatus(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', required=True)
+        parser.add_argument('className', required=True)
+        args = parser.parse_args()
+        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
+        classes = client['clicker']['classes']
+        mapping = client['clicker']['mapping']
+        try:
+            targetId = self.getID(classes, mapping, args)
+            return classes.find_one({"_id": targetId})['status']
+        except Exception as e:
+            return str(e)
+
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', required=True)
+        parser.add_argument('className', required=True)
+        parser.add_argument('status', required=True)
+        args = parser.parse_args()
+        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
+        classes = client['clicker']['classes']
+        mapping = client['clicker']['mapping']
+        try:
+            targetId = self.getID(classes, mapping, args)
+            classes.update({"_id": targetId}, {"$set": {"status": bool(args['status'] == "true")}})
+            return classes.find_one({"_id": targetId})['status']
+        except Exception as e:
+            return str(e)
+
+    def getID(self, classes, mapping, args):
+        ids = mapping.find_one({"_id":args['user']})['Classes']
+        targetId = None
+        for tag in ids.keys():
+            if ids.get(tag) == args['className']:
+                targetId = tag
+                break
+        return targetId
+            
+
 api.add_resource(createClass, '/createClass')
 api.add_resource(deleteUser, '/deleteUser')
 api.add_resource(deleteClass, '/deleteClass')
+api.add_resource(pollStatus, '/pollStatus')
