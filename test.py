@@ -10,10 +10,6 @@ def randomStringDigits(length):
 
 client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
 db = client['clicker'] 
-collection = db['mapping']
+mapping = db['mapping']
 
-# collection.insert_one({"_id":0, "name": "documenting class ids", "ids":[0]})
-while True:
-    name = "john"
-    result = collection.find({"name": name})
-    print(result)
+mapping.insert_one({"_id": 0, "classes": 0})
