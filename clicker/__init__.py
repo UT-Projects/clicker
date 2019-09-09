@@ -18,9 +18,9 @@ def index():
 def home():
     return render_template("home.html")
 
-@app.route("/user")
+@app.route("/createClass")
 def user():
-    return render_template("user.html")
+    return render_template("createClass.html")
 
 @app.route("/client")
 def client():
