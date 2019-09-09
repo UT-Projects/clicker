@@ -4,13 +4,15 @@ import json
 import pymongo
 import random
 import string
+import json
 
 app = Flask(__name__)
 api = Api(app)
 
 @app.route("/")
 def index():
-    return "HELLO WOLRD"
+    f = open("swagger.json", 'r')
+    return json.load(f)
 
 def randomStringDigits(length):
     """Generate a random string of letters and digits """
