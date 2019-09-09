@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask, g, render_template
 from flask_restful import Resource, Api, reqparse
 import json
 import pymongo
@@ -10,7 +10,7 @@ api = Api(app)
 
 @app.route("/")
 def index():
-    return "HELLO WOLRD"
+    return render_template("index.html")
 
 def randomStringDigits(length):
     """Generate a random string of letters and digits """
