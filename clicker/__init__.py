@@ -45,8 +45,7 @@ class createClass(Resource):
         parser.add_argument('user', required=True)
         parser.add_argument('className', required=True)
         args = parser.parse_args()
-        self.createNewClass(args)
-        return 200
+        return self.createNewClass(args)
         
     def createNewClass(self, args):
         collection, classes, mapping = getDB()
@@ -54,6 +53,8 @@ class createClass(Resource):
         className = args['className']
         code = self.getCode(collection)
         if self.checkUserName(collection, username):
+            if self.checkClass(mapping, username, className):
+                return 400
             mapping.update_one({"_id": username},  {"$set": {"Classes." + code: className}})
             classes.insert_one({"_id":code, "user": username,"class": className, "answers": {}, "status":False})
             collection.update_one({"_id": 0}, {"$addToSet": {"ids": code}})
@@ -62,6 +63,7 @@ class createClass(Resource):
             classes.insert_one({"_id":code, "user": username,"class": className, "answers": {}, "status":False})
             collection.update_one({"_id": 0}, {"$addToSet": {"ids": code}})
             collection.update_one({"_id": 0}, {"$addToSet": {"names": username}})
+        return 200
 
     def checkUserName(self, collection, username):
         ids = collection.find({"_id": 0})
@@ -76,6 +78,14 @@ class createClass(Resource):
             ids = collection.find({"_id": 0})
             if code not in ids[0]["ids"]:
                 return code
+
+    def checkClass(self, mapping, username, name):
+        data = mapping.find_one({'_id': username})['Classes']
+        for className in data.keys():
+            if data.get(className) == name:
+                return True
+        return False
+
 
 class deleteUser(Resource):
     def post(self):
