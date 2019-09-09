@@ -17,24 +17,28 @@ def randomStringDigits(length):
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join(random.choice(lettersAndDigits) for i in range(length))
 
+def getDB():
+    client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
+    db = client['clicker']
+    collection = db['ids']
+    classes = db['classes']
+    mapping = db['mapping']
+    return collection, classes, mapping
+
 class createClass(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('user', required=True)
         parser.add_argument('className', required=True)
         args = parser.parse_args()
-        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
-        db = client['clicker']
-        self.createNewClass(db, args)
+        self.createNewClass(args)
         return 200
         
-    def createNewClass(self, db, args):
+    def createNewClass(self, args):
+        collection, classes, mapping = getDB()
         username = args['user']
-        collection = db['ids']
         className = args['className']
         code = self.getCode(collection)
-        classes = db['classes']
-        mapping = db['mapping']
         if self.checkUserName(collection, username):
             mapping.update_one({"_id": username},  {"$set": {"Classes." + code: className}})
             classes.insert_one({"_id":code, "user": username,"class": className, "answers": {}, "status":False})
@@ -64,14 +68,10 @@ class deleteUser(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('user', required=True)
         args = parser.parse_args()
-        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
-        db = client['clicker']
-        return self.deleteUser(db, args['user'])
+        return self.deleteUser(args['user'])
 
-    def deleteUser(self, db, username):
-        mapping = db['mapping']
-        classes = db['classes']
-        collection = db['ids']
+    def deleteUser(self, username):
+        collection, classes, mapping = getDB()
         try:
             ids = mapping.find_one({"_id":username})['Classes']
             results = mapping.delete_one({"_id": username})
@@ -91,14 +91,10 @@ class deleteClass(Resource):
         parser.add_argument('user', required=True)
         parser.add_argument('className', required=True)
         args = parser.parse_args()
-        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
-        db = client['clicker']
-        return self.deleteClass(args['user'], args['className'], db)
+        return self.deleteClass(args['user'], args['className'])
 
-    def deleteClass(self, username, className, db):
-        mapping = db['mapping']
-        classes = db['classes']
-        collection = db['ids']
+    def deleteClass(self, username, className):
+        collection, classes, mapping = getDB()
         try:
             ids = mapping.find_one({"_id":username})['Classes']
             for tag in ids.keys():
@@ -118,9 +114,7 @@ class pollStatus(Resource):
         parser.add_argument('user', required=True)
         parser.add_argument('className', required=True)
         args = parser.parse_args()
-        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
-        classes = client['clicker']['classes']
-        mapping = client['clicker']['mapping']
+        collection, classes, mapping = getDB()
         try:
             targetId = self.getID(mapping, args)
             return classes.find_one({"_id": targetId})['status']
@@ -133,9 +127,7 @@ class pollStatus(Resource):
         parser.add_argument('className', required=True)
         parser.add_argument('status', required=True)
         args = parser.parse_args()
-        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
-        classes = client['clicker']['classes']
-        mapping = client['clicker']['mapping']
+        collection, classes, mapping = getDB()
         try:
             targetId = self.getID(mapping, args)
             classes.update({"_id": targetId}, {"$set": {"status": bool(args['status'] == "true")}})
@@ -160,9 +152,7 @@ class answer(Resource):
         parser.add_argument('className', required=True)
         parser.add_argument('answer', required=True)
         args = parser.parse_args()
-        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
-        classes = client['clicker']['classes']
-        mapping = client['clicker']['mapping']
+        collection, classes, mapping = getDB()
         targetId = pollStatus.getID(self, mapping, args)
         if classes.find_one({"_id": targetId})['status']:
             if args['client'] not in classes.find_one({"_id": targetId})['answers'].keys():
@@ -171,8 +161,26 @@ class answer(Resource):
             return "name taken"
         return "not open"
 
+class report(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', required=True)
+        parser.add_argument('className', required=True)
+        args = parser.parse_args()
+        collection, classes, mapping = getDB()
+        targetId = pollStatus.getID(self, mapping, args)
+        try:
+            classData = classes.find_one({"_id": targetId})
+            if not classData['status']:
+                return classData['answers']
+            else:
+                return "poll still open"
+        except Exception as e:
+            return str(e)
+
 api.add_resource(createClass, '/createClass')
 api.add_resource(deleteUser, '/deleteUser')
 api.add_resource(deleteClass, '/deleteClass')
 api.add_resource(pollStatus, '/pollStatus')
 api.add_resource(answer, '/answer')
+api.add_resource(report, '/report')
