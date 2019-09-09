@@ -37,11 +37,11 @@ class createClass(Resource):
         mapping = db['mapping']
         if self.checkUserName(collection, username):
             mapping.update_one({"_id": username},  {"$set": {"Classes." + code: className}})
-            classes.insert_one({"_id":code, "user": username,"class": className, "status":False})
+            classes.insert_one({"_id":code, "user": username,"class": className, "answers": [], "status":False})
             collection.update_one({"_id": 0}, {"$addToSet": {"ids": code}})
         else:
             mapping.insert_one({"_id": username, "Classes" : {code: className}})
-            classes.insert_one({"_id":code, "user": username,"class": className, "status":False})
+            classes.insert_one({"_id":code, "user": username,"class": className, "answers": [], "status":False})
             collection.update_one({"_id": 0}, {"$addToSet": {"ids": code}})
             collection.update_one({"_id": 0}, {"$addToSet": {"names": username}})
 
