@@ -37,11 +37,11 @@ class createClass(Resource):
         mapping = db['mapping']
         if self.checkUserName(collection, username):
             mapping.update_one({"_id": username},  {"$set": {"Classes." + code: className}})
-            classes.insert_one({"_id":code, "user": username,"class": className, "answers": [], "status":False})
+            classes.insert_one({"_id":code, "user": username,"class": className, "answers": {}, "status":False})
             collection.update_one({"_id": 0}, {"$addToSet": {"ids": code}})
         else:
             mapping.insert_one({"_id": username, "Classes" : {code: className}})
-            classes.insert_one({"_id":code, "user": username,"class": className, "answers": [], "status":False})
+            classes.insert_one({"_id":code, "user": username,"class": className, "answers": {}, "status":False})
             collection.update_one({"_id": 0}, {"$addToSet": {"ids": code}})
             collection.update_one({"_id": 0}, {"$addToSet": {"names": username}})
 
@@ -122,7 +122,7 @@ class pollStatus(Resource):
         classes = client['clicker']['classes']
         mapping = client['clicker']['mapping']
         try:
-            targetId = self.getID(classes, mapping, args)
+            targetId = self.getID(mapping, args)
             return classes.find_one({"_id": targetId})['status']
         except Exception as e:
             return str(e)
@@ -137,13 +137,13 @@ class pollStatus(Resource):
         classes = client['clicker']['classes']
         mapping = client['clicker']['mapping']
         try:
-            targetId = self.getID(classes, mapping, args)
+            targetId = self.getID(mapping, args)
             classes.update({"_id": targetId}, {"$set": {"status": bool(args['status'] == "true")}})
             return classes.find_one({"_id": targetId})['status']
         except Exception as e:
             return str(e)
 
-    def getID(self, classes, mapping, args):
+    def getID(self, mapping, args):
         ids = mapping.find_one({"_id":args['user']})['Classes']
         targetId = None
         for tag in ids.keys():
@@ -151,9 +151,28 @@ class pollStatus(Resource):
                 targetId = tag
                 break
         return targetId
-            
+
+class answer(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('client', required=True)
+        parser.add_argument('user', required=True)
+        parser.add_argument('className', required=True)
+        parser.add_argument('answer', required=True)
+        args = parser.parse_args()
+        client = pymongo.MongoClient("mongodb+srv://db:db@clicker-ancot.mongodb.net/test?retryWrites=true&w=majority")
+        classes = client['clicker']['classes']
+        mapping = client['clicker']['mapping']
+        targetId = pollStatus.getID(self, mapping, args)
+        if classes.find_one({"_id": targetId})['status']:
+            if args['client'] not in classes.find_one({"_id": targetId})['answers'].keys():
+                classes.update_one({"_id": targetId}, {"$set": {"answers." + args['client']: args['answer']}})
+                return 200
+            return "name taken"
+        return "not open"
 
 api.add_resource(createClass, '/createClass')
 api.add_resource(deleteUser, '/deleteUser')
 api.add_resource(deleteClass, '/deleteClass')
 api.add_resource(pollStatus, '/pollStatus')
+api.add_resource(answer, '/answer')
