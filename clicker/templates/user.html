@@ -3,13 +3,44 @@
 
 window.onload = function() {
 	// setup the button click
-	document.getElementById("pollButton").onclick = function() {
+	document.getElementById("createClass").onclick = function() {
 		poll()
     };
-
+    document.getElementById("deleteUser").onclick = function() {
+		poll1()
+    };
+    document.getElementById("pollStatus").onclick = function() {
+		poll2()
+    };
 }
 
 function poll() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:5000/createClass");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify({"user": "alex", "className": "math"}));
+    xhttp.onreadystatechange = function() {
+        if (xhttp.status == 200) {
+            console.log(xhttp.responseText);
+        }
+    }
+    event.preventDefault();
+}
+
+function poll1() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:5000/deleteUser");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify({"user": "alex"}));
+    xhttp.onreadystatechange = function() {
+        if (xhttp.status == 200) {
+            console.log(xhttp.responseText);
+        }
+    }
+    event.preventDefault();
+}
+
+function poll2() {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "http://localhost:5000/pollStatus/alex/math");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -23,4 +54,6 @@ function poll() {
 }
 
 </script>
-<button type=button id="pollButton">pollStatus</button>
+<button type=button id="createClass">createClass</button>
+<button type=button id="deleteUser">deleteUser</button>
+<button type=button id="pollStatus">pollStatus</button>
