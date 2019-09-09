@@ -14,6 +14,14 @@ window.onload = function() {
         createClass()
         event.preventDefault();
     }
+    document.getElementById("back").onclick = function() {
+		backHome()
+    };
+}
+
+function backHome() {
+	location.href = "home"
+event.preventDefault();
 }
 
 function createClass() {
@@ -63,7 +71,8 @@ function createClass() {
 <button type=button id="pollStatus">pollStatus</button> -->
 
 <form id='test-form'>
-    Input1: <input name='user'><br>
-    Input2: <input name='class'><br>
+    User :  <input name='user'><br>
+    Class: <input name='class'><br>
     <input type='submit'>
 </form>
+<button type=button id="back">Home</button>
