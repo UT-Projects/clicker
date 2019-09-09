@@ -1,0 +1,29 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+
+window.onload = function() {
+	// setup the button click
+	document.getElementById("userButton").onclick = function() {
+		userOpen()
+    };
+
+	document.getElementById("clientButton").onclick = function() {
+		clientOpen()
+	};
+}
+
+function userOpen() {
+	location.href = "user"
+event.preventDefault();
+}
+
+function clientOpen() {
+	location.href = "client"
+event.preventDefault();
+}
+
+</script>
+
+<h1 style="text-align:center"><font face = "impact" size = "10">UT Clicker</h1></font>
+<marquee direction = left speed = 15><button type=button id="userButton">User</button></marquee>
+<marquee direction = right speed = 15><button type=button id="clientButton">Client</button></marquee>
