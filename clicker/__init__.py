@@ -137,7 +137,7 @@ class pollStatus(Resource):
         collection, classes, mapping = getDB()
         try:
             targetId = self.getID(mapping, args)
-            return classes.find_one({"_id": targetId})['status']
+            return str(classes.find_one({"_id": targetId})['status'])
         except Exception as e:
             return str(e)
 
