@@ -10,7 +10,21 @@ api = Api(app)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    f = open("swagger.json", "r")
+    return f.read()
+
+@app.route("/home")
+def home():
+    return render_template("home.html")
+
+@app.route("/user")
+def user():
+    print("test")
+    return render_template("user.html")
+
+@app.route("/client")
+def client():
+    return render_template("client.html")
 
 def randomStringDigits(length):
     """Generate a random string of letters and digits """
