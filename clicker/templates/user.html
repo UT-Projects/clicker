@@ -11,13 +11,9 @@ window.onload = function() {
 
 function poll() {
     var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "http://localhost:5000/pollStatus");
+    xhttp.open("GET", "http://localhost:5000/pollStatus/alex/math");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.send(JSON.stringify({
-            "user": "alex",
-            "className": "math",
-            "status": "false"
-            }));
+    xhttp.send();
     xhttp.onreadystatechange = function() {
         if (xhttp.status == 200) {
             console.log(xhttp.responseText);

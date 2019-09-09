@@ -20,7 +20,6 @@ def home():
 
 @app.route("/user")
 def user():
-    print("test")
     return render_template("user.html")
 
 @app.route("/client")
@@ -124,37 +123,31 @@ class deleteClass(Resource):
         return 200
 
 class pollStatus(Resource):
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('user', required=True)
-        parser.add_argument('className', required=True)
-        args = parser.parse_args()
+    def get(self, user, className):
         collection, classes, mapping = getDB()
         try:
-            targetId = self.getID(mapping, args)
+            targetId = self.getID(mapping, user, className)
             return str(classes.find_one({"_id": targetId})['status'])
         except Exception as e:
             return str(e)
 
-    def post(self):
+    def post(self, user, className):
         parser = reqparse.RequestParser()
-        parser.add_argument('user', required=True)
-        parser.add_argument('className', required=True)
         parser.add_argument('status', required=True)
         args = parser.parse_args()
         collection, classes, mapping = getDB()
         try:
-            targetId = self.getID(mapping, args)
+            targetId = self.getID(mapping, user, className)
             classes.update({"_id": targetId}, {"$set": {"status": bool(args['status'] == "true")}})
             return classes.find_one({"_id": targetId})['status']
         except Exception as e:
             return str(e)
 
-    def getID(self, mapping, args):
-        ids = mapping.find_one({"_id":args['user']})['Classes']
+    def getID(self, mapping, user, className):
+        ids = mapping.find_one({"_id":user})['Classes']
         targetId = None
         for tag in ids.keys():
-            if ids.get(tag) == args['className']:
+            if ids.get(tag) == className:
                 targetId = tag
                 break
         return targetId
@@ -168,7 +161,7 @@ class answer(Resource):
         parser.add_argument('answer', required=True)
         args = parser.parse_args()
         collection, classes, mapping = getDB()
-        targetId = pollStatus.getID(self, mapping, args)
+        targetId = pollStatus.getID(self, mapping, args['user'], args['className'])
         if classes.find_one({"_id": targetId})['status']:
             if args['client'] not in classes.find_one({"_id": targetId})['answers'].keys():
                 classes.update_one({"_id": targetId}, {"$set": {"answers." + args['client']: args['answer']}})
@@ -177,13 +170,9 @@ class answer(Resource):
         return "not open"
 
 class report(Resource):
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('user', required=True)
-        parser.add_argument('className', required=True)
-        args = parser.parse_args()
+    def get(self, user, className):
         collection, classes, mapping = getDB()
-        targetId = pollStatus.getID(self, mapping, args)
+        targetId = pollStatus.getID(self, mapping, user, className)
         try:
             classData = classes.find_one({"_id": targetId})
             if not classData['status']:
@@ -196,6 +185,6 @@ class report(Resource):
 api.add_resource(createClass, '/createClass')
 api.add_resource(deleteUser, '/deleteUser')
 api.add_resource(deleteClass, '/deleteClass')
-api.add_resource(pollStatus, '/pollStatus')
+api.add_resource(pollStatus, '/pollStatus/<string:user>/<string:className>')
 api.add_resource(answer, '/answer')
-api.add_resource(report, '/report')
+api.add_resource(report, '/report/<string:user>/<string:className>')
