@@ -18,8 +18,16 @@ def index():
 def home():
     return render_template("home.html")
 
-@app.route("/createClass")
+@app.route("/poll")
+def poll():
+    return render_template("poll.html")
+
+@app.route("/user")
 def user():
+    return render_template("user.html")
+
+@app.route("/createClass")
+def createClass():
     return render_template("createClass.html")
 
 @app.route("/client")

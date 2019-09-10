@@ -17,6 +17,14 @@ window.onload = function() {
     document.getElementById("back").onclick = function() {
 		backHome()
     };
+    document.getElementById("user").onclick = function() {
+		backUser()
+    };
+}
+
+function backUser() {
+	location.href = "user"
+event.preventDefault();
 }
 
 function backHome() {
@@ -75,4 +83,5 @@ function createClass() {
     Class: <input name='class'><br>
     <input type='submit'>
 </form>
+<button type=button id="user">Back</button>
 <button type=button id="back">Home</button>

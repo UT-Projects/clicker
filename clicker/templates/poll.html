@@ -1,0 +1,23 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+    document.getElementById("backUser").onclick = function() {
+		backUser()
+    };
+
+    document.getElementById("back").onclick = function() {
+		backHome()
+    };
+}
+function backHome() {
+	location.href = "home"
+event.preventDefault();
+}
+
+function backUser() {
+	location.href = "user"
+event.preventDefault();
+}
+</script>
+<button type=button id="backUser">Back</button>
+<button type=button id="back">Home</button>
