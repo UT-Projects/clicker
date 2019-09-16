@@ -1,1 +1,49 @@
 <b> client test</b>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+    document.getElementById("message").innerHTML = "";
+    document.getElementById("back").onclick = function() {
+		backHome()
+    };
+    var testForm = document.getElementById('test-form');
+    testForm.onsubmit = function(event) {
+        submit()
+        event.preventDefault();
+    }
+}
+function backHome() {
+	location.href = "home"
+event.preventDefault();
+}
+function submit() {
+    var formData = new FormData(document.getElementById('test-form'));
+    console.log(formData)
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:5000/answer");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify({"client": formData.get('client'), "user": formData.get('user'), "className": formData.get('class'), "answer": formData.get('answer')}));
+    xhttp.onreadystatechange = function() {
+        if (xhttp.status == 200) {
+            console.log(xhttp.responseText);
+            if(xhttp.responseText == 200){
+                document.getElementById("message").innerHTML = "Success";
+            }
+            else{
+                document.getElementById("message").innerHTML = "Error";
+            }
+        }
+    } 
+    event.preventDefault();
+}
+</script>
+<marquee scrollamount = 1000> hello ansh</marquee>
+<form id='test-form'>
+    Name:<input name='client'><br>
+    Prof : <input name='user'><br>
+    Class: <input name='class'><br>
+    ANS : <input name='answer'><br>
+    <input type='submit'>
+</form>
+<button type=button id="back">Home</button>
+<p id="message"></p>
