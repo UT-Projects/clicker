@@ -9,6 +9,7 @@ window.onload = function() {
     // document.getElementById("pollStatus").onclick = function() {
 	// 	pollStatus()
     // };
+    document.getElementById("message").innerHTML = "";
     var testForm = document.getElementById('test-form');
     testForm.onsubmit = function(event) {
         createClass()
@@ -42,6 +43,12 @@ function createClass() {
     xhttp.onreadystatechange = function() {
         if (xhttp.status == 200) {
             console.log(xhttp.responseText);
+            if(xhttp.responseText == 200){
+                document.getElementById("message").innerHTML = "Success";
+            }
+            else{
+                document.getElementById("message").innerHTML = "Error";
+            }
         }
     }
     event.preventDefault();
@@ -85,3 +92,4 @@ function createClass() {
 </form>
 <button type=button id="user">Back</button>
 <button type=button id="back">Home</button>
+<p id="message"></p>

@@ -147,7 +147,7 @@ class pollStatus(Resource):
             targetId = self.getID(mapping, user, className)
             return str(classes.find_one({"_id": targetId})['status'])
         except Exception as e:
-            return str(e)
+            return className
 
     def post(self, user, className):
         parser = reqparse.RequestParser()

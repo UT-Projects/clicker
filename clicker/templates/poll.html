@@ -1,6 +1,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script type="text/javascript">
 window.onload = function() {
+    document.getElementById("message").innerHTML = "";
     document.getElementById("backUser").onclick = function() {
 		backUser()
     };
@@ -8,6 +9,11 @@ window.onload = function() {
     document.getElementById("back").onclick = function() {
 		backHome()
     };
+    var testForm = document.getElementById('test-form');
+    testForm.onsubmit = function(event) {
+        pollStatus()
+        event.preventDefault();
+    }
 }
 function backHome() {
 	location.href = "home"
@@ -18,6 +24,27 @@ function backUser() {
 	location.href = "user"
 event.preventDefault();
 }
+
+function pollStatus() {
+  var formData = new FormData(document.getElementById('test-form'));
+    console.log(formData)
+    var xhttp = new XMLHttpRequest();
+    var url = "http://localhost:5000/pollStatus/" + formData.get('user') + "/" + formData.get('class');
+    xhttp.open("GET", url);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send();
+    xhttp.onreadystatechange = function() {
+      console.log(xhttp.responseText);
+      document.getElementById("message").innerHTML = xhttp.responseText;
+    }
+    event.preventDefault();
+}
 </script>
+<form id='test-form'>
+  User :  <input name='user'><br>
+  Class: <input name='class'><br>
+  <input type='submit'>
+</form>
 <button type=button id="backUser">Back</button>
 <button type=button id="back">Home</button>
+<p id="message"></p>
