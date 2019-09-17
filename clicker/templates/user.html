@@ -5,8 +5,8 @@ window.onload = function() {
 		backHome()
     };
 
-    document.getElementById("createClass").onclick = function() {
-		createClass()
+    document.getElementById("Class").onclick = function() {
+		classes()
     };
 
     document.getElementById("poll").onclick = function() {
@@ -18,8 +18,8 @@ function backHome() {
 event.preventDefault();
 }
 
-function createClass() {
-	location.href = "createClass"
+function classes() {
+	location.href = "classes"
 event.preventDefault();
 }
 
@@ -31,4 +31,4 @@ event.preventDefault();
 </script>
 <button type=button id="back">Home</button>
 <button type=button id="poll">Poll Status</button>
-<button type=button id="createClass">Create Class</button>
+<button type=button id="Class">Create/Delete Class</button>
