@@ -1,0 +1,12 @@
+<form method=POST action="{{ url_for('register') }}">
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" name="username" placeholder="Username">
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" name="pass" placeholder="Password">
+    </div>
+    <button type="client" class="btn btn-primary btn-block">registerClient</button>
+    <button type="user" class="btn btn-primary btn-block">registerUser</button>
+</form>

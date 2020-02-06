@@ -15,6 +15,11 @@ window.onload = function() {
         createClass()
         event.preventDefault();
     }
+    var create_form = document.getElementById('delete-form');
+    create_form.onsubmit = function(event) {
+        deleteClass()
+        event.preventDefault();
+    }
     document.getElementById("back").onclick = function() {
 		backHome()
     };
@@ -38,6 +43,27 @@ function createClass() {
     console.log(formData)
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "http://localhost:5000/createClass");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify({"user": formData.get('user'), "className": formData.get('class')}));
+    xhttp.onreadystatechange = function() {
+        if (xhttp.status == 200) {
+            console.log(xhttp.responseText);
+            if(xhttp.responseText == 200){
+                document.getElementById("check_message").innerHTML = "Success";
+            }
+            else{
+                document.getElementById("check_message").innerHTML = "Error";
+            }
+        }
+    }
+    event.preventDefault();
+}
+
+function deleteClass() {
+    var formData = new FormData(document.getElementById('delete-form'));
+    console.log(formData)
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:5000/deleteClass");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send(JSON.stringify({"user": formData.get('user'), "className": formData.get('class')}));
     xhttp.onreadystatechange = function() {
