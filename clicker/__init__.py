@@ -10,56 +10,56 @@ import bcrypt
 
 app = Flask(__name__)
 
-app.config['MONGO_DBNAME'] = 'clicker'
+app.config['MONGO_DBNAME'] = 'clicker'                  # mongoDB authentication to be moved to config file and enconded
 app.config['MONGO_URI'] = 'mongodb+srv://db:db@clicker-ancot.mongodb.net/clicker?retryWrites=true&w=majority'
 api = Api(app)
 
 mongo = PyMongo(app)
 
 @app.route("/")
-def index():
+def index():                    # Default path open swagger API docs
   f = open("swagger.json", 'r')
   return json.load(f)
 
-@app.route("/home")
+@app.route("/home")             # Homepage for registering and loggin in
 def home():
     return render_template("home.html")
 
-@app.route("/register", methods=['POST', 'GET'])
+@app.route("/register", methods=['POST', 'GET'])        # Registering page, to be changed to Google Log in 
 def register():
-    if(request.method == 'POST'):
+    if(request.method == 'POST'):   # Post request to register
         users = mongo.db.users
         findExisting = users.find_one({'name' : request.form['username']})
         if findExisting is None:
-            hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
+            hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())  # Bcrypt hashing
             users.insert({'name' : request.form['username'], 'password' : hashpass})
             session['username'] = request.form['username']
             return redirect(url_for('index'))
         return 'That username already exists'
     return render_template('register.html')
 
-@app.route("/poll")
+@app.route("/poll")     # Answering page
 def poll():
     return render_template("poll.html")
 
-@app.route("/user")
+@app.route("/user")     # Professor Overview page
 def user():
     return render_template("user.html")
 
-@app.route("/classes")
+@app.route("/classes")  # Classes display page
 def classes():
     return render_template("classes.html")
 
-@app.route("/client")
+@app.route("/client")   # Student main page
 def client():
     return render_template("client.html")
 
-def randomStringDigits(length):
+def randomStringDigits(length):     # Code Generation for class ids 
     """Generate a random string of letters and digits """
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join(random.choice(lettersAndDigits) for i in range(length))
 
-class createClass(Resource):
+class createClass(Resource):        # Endpoint creates a class object in the db
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('user', required=True)
@@ -71,7 +71,7 @@ class createClass(Resource):
         username = args['user']
         className = args['className']
         code = self.getCode()
-        if self.checkUserName(username):
+        if self.checkUserName(username):    # Check if username exists; add to existing user data or create new user
             if self.checkClass(username, className):
                 return 400
             mongo.db.mapping.update_one({"_id": username},  {"$set": {"Classes." + code: className}})
@@ -84,21 +84,21 @@ class createClass(Resource):
             mongo.db.ids.update_one({"_id": 0}, {"$addToSet": {"names": username}})
         return 200
 
-    def checkUserName(self, username):
+    def checkUserName(self, username):      # Check if username exists
         ids = mongo.db.ids.find({"_id": 0})
         if username in ids[0]["names"]:
             return True
         else:
             return False
     
-    def getCode(self):
+    def getCode(self):      # Retrieve code for class ids
         while True:
             code = randomStringDigits(10)
             ids = mongo.db.ids.find({"_id": 0})
             if code not in ids[0]["ids"]:
                 return code
 
-    def checkClass(self, username, name):
+    def checkClass(self, username, name):       # Check if a class name exists in the db
         data = mongo.db.mapping.find_one({'_id': username})['Classes']
         for className in data.keys():
             if data.get(className) == name:
@@ -112,7 +112,7 @@ class deleteUser(Resource):
         args = parser.parse_args()
         return self.deleteUser(args['user'])
 
-    def deleteUser(self, username):
+    def deleteUser(self, username):     # Delete the user entirely from the backend
         try:
             ids = mongo.db.mapping.find_one({"_id":username})['Classes']
             results = mongo.db.mapping.delete_one({"_id": username})
@@ -134,7 +134,7 @@ class deleteClass(Resource):
         args = parser.parse_args()
         return self.deleteClass(args['user'], args['className'])
 
-    def deleteClass(self, username, className):
+    def deleteClass(self, username, className): # Delete a specific class from a user
         try:
             ids = mongo.db.mapping.find_one({"_id":username})['Classes']
             for tag in ids.keys():
@@ -148,15 +148,15 @@ class deleteClass(Resource):
             return str(e)
         return 200
 
-class pollStatus(Resource):
+class pollStatus(Resource):     # Return or update the status of a poll given user and class data
     def get(self, user, className):
         try:
-            targetId = self.getID(mongo.db.mapping, user, className)
+            targetId = self.getID(user, className)
             return str(mongo.db.classes.find_one({"_id": targetId})['status'])
         except Exception as e:
-            return className
+            return e
 
-    def post(self, user, className):
+    def post(self, user, className):        # Update the status of the poll
         parser = reqparse.RequestParser()
         parser.add_argument('status', required=True)
         args = parser.parse_args()
@@ -167,7 +167,7 @@ class pollStatus(Resource):
         except Exception as e:
             return str(e)
 
-    def getID(self, user, className):
+    def getID(self, user, className):       # Get the ID of a specific class
         ids = mongo.db.mapping.find_one({"_id":user})['Classes']
         targetId = None
         for tag in ids.keys():
@@ -176,7 +176,7 @@ class pollStatus(Resource):
                 break
         return targetId
 
-class answer(Resource):
+class answer(Resource):     # Answer a given poll if it is open
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('client', required=True)
@@ -192,7 +192,7 @@ class answer(Resource):
             return "name taken"
         return "not open"
 
-class report(Resource):
+class report(Resource):     # Return a dictionary of the answers collected
     def get(self, user, className):
         targetId = pollStatus.getID(self, user, className)
         try:
