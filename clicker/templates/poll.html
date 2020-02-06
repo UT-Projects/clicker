@@ -1,0 +1,80 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+    document.getElementById("checkMessage").innerHTML = "";
+    document.getElementById("changeMessage").innerHTML = "";
+    document.getElementById("backUser").onclick = function() {
+		backUser()
+    };
+
+    document.getElementById("back").onclick = function() {
+		backHome()
+    };
+    var check_form = document.getElementById('check-form');
+    check_form.onsubmit = function(event) {
+        pollStatus()
+        event.preventDefault();
+    }
+    var change_form = document.getElementById('change-form');
+    change_form.onsubmit = function(event) {
+        poll()
+        event.preventDefault();
+    }
+}
+function backHome() {
+	location.href = "home"
+event.preventDefault();
+}
+
+function backUser() {
+	location.href = "user"
+event.preventDefault();
+}
+
+function pollStatus() {
+  var formData = new FormData(document.getElementById('check-form'));
+    console.log(formData)
+    var xhttp = new XMLHttpRequest();
+    var url = "http://localhost:5000/pollStatus/" + formData.get('user') + "/" + formData.get('class');
+    xhttp.open("GET", url);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send();
+    xhttp.onreadystatechange = function() {
+      console.log(xhttp.responseText);
+      document.getElementById("checkMessage").innerHTML = xhttp.responseText;
+    }
+    event.preventDefault();
+}
+
+function poll() {
+  var formData = new FormData(document.getElementById('change-form'));
+    console.log(formData)
+    var xhttp = new XMLHttpRequest();
+    var url = "http://localhost:5000/pollStatus/" + formData.get('user') + "/" + formData.get('class');
+    xhttp.open("POST", url);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify({'status': formData.get('status')}));
+    xhttp.onreadystatechange = function() {
+      console.log(xhttp.responseText);
+      document.getElementById("changeMessage").innerHTML = xhttp.responseText;
+    }
+    event.preventDefault();
+}
+</script>
+<p id="title">Check Poll Status:</p>
+<form id='check-form'>
+  User :  <input name='user'><br>
+  Class: <input name='class'><br>
+  <input type='submit'>
+</form>
+<p id="checkMessage"></p>
+<p id="title">Change Poll Status:</p>
+<form id='change-form'>
+  User :  <input name='user'><br>
+  Class: <input name='class'><br>
+  Status: <input name='status'><br>
+  <input type='submit'>
+</form>
+<p id="changeMessage"></p>
+<button type=button id="backUser">Back</button>
+<button type=button id="back">Home</button>

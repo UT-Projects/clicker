@@ -10,6 +10,10 @@ window.onload = function() {
 	document.getElementById("clientButton").onclick = function() {
 		clientOpen()
 	};
+
+	document.getElementById("registerButton").onclick = function() {
+		toRegister()
+	};
 }
 
 function userOpen() {
@@ -22,8 +26,14 @@ function clientOpen() {
 event.preventDefault();
 }
 
+function toRegister() {
+	location.href = "register"
+event.preventDefault();
+}
+
 </script>
 
 <h1 style="text-align:center"><font face = "impact" size = "10">UT Clicker</h1></font>
-<marquee direction = left speed = 15><button type=button id="userButton">User</button></marquee>
-<marquee direction = right speed = 15><button type=button id="clientButton">Client</button></marquee>
+<button type=button id="userButton">User</button>
+<button type=button id="clientButton">Client</button>
+<button type=button id="registerButton">register</button>

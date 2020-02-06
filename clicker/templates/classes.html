@@ -1,0 +1,115 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+
+window.onload = function() {
+	// setup the button click
+    // document.getElementById("deleteUser").onclick = function() {
+	// 	deleteUser()
+    // };
+    // document.getElementById("pollStatus").onclick = function() {
+	// 	pollStatus()
+    // };
+    document.getElementById("check_message").innerHTML = "";
+    var create_form = document.getElementById('create-form');
+    create_form.onsubmit = function(event) {
+        createClass()
+        event.preventDefault();
+    }
+    var create_form = document.getElementById('delete-form');
+    create_form.onsubmit = function(event) {
+        deleteClass()
+        event.preventDefault();
+    }
+    document.getElementById("back").onclick = function() {
+		backHome()
+    };
+    document.getElementById("user").onclick = function() {
+		backUser()
+    };
+}
+
+function backUser() {
+	location.href = "user"
+event.preventDefault();
+}
+
+function backHome() {
+	location.href = "home"
+event.preventDefault();
+}
+
+function createClass() {
+    var formData = new FormData(document.getElementById('create-form'));
+    console.log(formData)
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:5000/createClass");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify({"user": formData.get('user'), "className": formData.get('class')}));
+    xhttp.onreadystatechange = function() {
+        if (xhttp.status == 200) {
+            console.log(xhttp.responseText);
+            if(xhttp.responseText == 200){
+                document.getElementById("check_message").innerHTML = "Success";
+            }
+            else{
+                document.getElementById("check_message").innerHTML = "Error";
+            }
+        }
+    }
+    event.preventDefault();
+}
+
+function deleteClass() {
+    var formData = new FormData(document.getElementById('delete-form'));
+    console.log(formData)
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:5000/deleteClass");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify({"user": formData.get('user'), "className": formData.get('class')}));
+    xhttp.onreadystatechange = function() {
+        if (xhttp.status == 200) {
+            console.log(xhttp.responseText);
+            if(xhttp.responseText == 200){
+                document.getElementById("check_message").innerHTML = "Success";
+            }
+            else{
+                document.getElementById("check_message").innerHTML = "Error";
+            }
+        }
+    }
+    event.preventDefault();
+}
+
+// function deleteUser() {
+//     var xhttp = new XMLHttpRequest();
+//     xhttp.open("POST", "http://localhost:5000/deleteUser");
+//     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+//     xhttp.send(JSON.stringify({"user": "alex"}));
+//     xhttp.onreadystatechange = function() {
+//         if (xhttp.status == 200) {
+//             console.log(xhttp.responseText);
+//         }
+//     }
+//     event.preventDefault();
+// }
+
+</script>
+<!-- <button type=button id="createClass">createClass</button>
+<button type=button id="deleteUser">deleteUser</button>
+<button type=button id="pollStatus">pollStatus</button> -->
+<p id="title">Create Class:</p>
+<form id='create-form'>
+    User :  <input name='user'><br>
+    Class: <input name='class'><br>
+    <input type='submit'>
+</form>
+<p id="check_message"></p>
+<p id="title">Delete Class:</p>
+<form id='delete-form'>
+    User :  <input name='user'><br>
+    Class: <input name='class'><br>
+    <input type='submit'>
+</form>
+<p id="delete_message"></p>
+<button type=button id="user">Back</button>
+<button type=button id="back">Home</button>
