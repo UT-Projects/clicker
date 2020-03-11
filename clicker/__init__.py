@@ -1,4 +1,4 @@
-from flask import Flask, g, render_template, request, session, redirect, url_for
+from flask import Flask, g, render_template, request, session, redirect, url_for, jsonify
 from flask_restful import Resource, Api, reqparse
 from flask_pymongo import PyMongo
 import json
@@ -7,6 +7,9 @@ import random
 import string
 import json
 import bcrypt
+from os import path
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 app = Flask(__name__)
 
@@ -27,15 +30,6 @@ def home():
 
 @app.route("/register", methods=['POST', 'GET'])        # Registering page, to be changed to Google Log in 
 def register():
-    if(request.method == 'POST'):   # Post request to register
-        users = mongo.db.users
-        findExisting = users.find_one({'name' : request.form['username']})
-        if findExisting is None:
-            hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())  # Bcrypt hashing
-            users.insert({'name' : request.form['username'], 'password' : hashpass})
-            session['username'] = request.form['username']
-            return redirect(url_for('index'))
-        return 'That username already exists'
     return render_template('register.html')
 
 @app.route("/poll")     # Answering page
@@ -58,6 +52,50 @@ def randomStringDigits(length):     # Code Generation for class ids
     """Generate a random string of letters and digits """
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join(random.choice(lettersAndDigits) for i in range(length))
+
+class registerUser(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('_id', required=True)
+        parser.add_argument('type', required=True)
+        parser.add_argument('name', required=True)
+        args = parser.parse_args()
+        mongo.db.users.insert_one(args)
+        return 201
+
+class userManagement(Resource):
+    def get(self, idtoken):
+        owd = path.dirname(__file__)
+        credFile = owd[:owd.rfind("clicker")] + "credentials.json"
+        with open(credFile) as f:
+            data = json.load(f)
+        try:
+            # Specify the CLIENT_ID of the app that accesses the backend:
+            idinfo = id_token.verify_oauth2_token(idtoken, requests.Request(), data.get('web').get('client_id'))
+
+            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                raise ValueError('Wrong issuer.')
+
+            # ID token is valid. Get the user's Google Account ID from the decoded token.
+            userid = idinfo['sub']
+            test = self.checkUser(userid)
+            print(userid, flush=True)
+            # print(mongo.db.users.find_one({"_id": userid}), flush=True)
+            if(mongo.db.users.find_one({"_id": userid}) == None):
+                return jsonify(dict(redirect='register'))
+            else:
+                # return mongo.db.users.find({"_id": userid})
+                return jsonify(dict(redirect='poll'))
+        except Exception as e:
+            print(e)
+            # Invalid token
+            return e
+    
+    def checkUser(self, userid):
+        if mongo.db.users.find({"_id": userid}) != None:
+            return
+        else:
+            register(userid)
 
 class createClass(Resource):        # Endpoint creates a class object in the db
     def post(self):
@@ -210,3 +248,5 @@ api.add_resource(deleteClass, '/deleteClass')
 api.add_resource(pollStatus, '/pollStatus/<string:user>/<string:className>')
 api.add_resource(answer, '/answer')
 api.add_resource(report, '/report/<string:user>/<string:className>')
+api.add_resource(userManagement, '/validate/tokensignin/<string:idtoken>')
+api.add_resource(registerUser, '/registerUser')

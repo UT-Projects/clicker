@@ -4,4 +4,6 @@ pymongo
 dnspython
 Flask-PyMongo
 request
+requests
 bcrypt
+google-api-python-client

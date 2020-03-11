@@ -1,12 +1,53 @@
-<form method=POST action="{{ url_for('register') }}">
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" class="form-control" name="username" placeholder="Username">
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" name="pass" placeholder="Password">
-    </div>
-    <button type="client" class="btn btn-primary btn-block">registerClient</button>
-    <button type="user" class="btn btn-primary btn-block">registerUser</button>
-</form>
+<html>
+<head>
+  <meta name="google-signin-client_id" content="956189670156-ultqqa3u01oc7t4756nsgis00o6fob6i.apps.googleusercontent.com">
+</head>
+<body>
+  <script>
+    window.onload = function() {
+        document.getElementById("back").onclick = function() {
+        signOut()
+        };
+
+        document.getElementById("profRegistration").onclick = function() {
+        register('prof')
+        };
+
+        document.getElementById("studentRegistration").onclick = function() {
+        register('student')
+        };
+    }
+
+    function register(type) {
+      var auth2 = gapi.auth2.init();
+      var profile = auth2.currentUser.get().getBasicProfile();
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'http://localhost:5000/registerUser');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        window.location.href = '/poll'
+      };
+      var data = JSON.stringify({'_id': profile.getId(),'type': type, 'name': profile.getName()})
+      xhr.send(data);
+    }
+
+    function signOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+      });
+      window.location = '/home'
+    }
+
+    function onLoad() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init();
+      });
+    }
+  </script>
+  <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+  <button type=button id="profRegistration">Register as Professor</button>
+  <button type=button id="studentRegistration">Register as Student</button>
+  <button type=button id="back">Home</button>
+</body>
+</html>
