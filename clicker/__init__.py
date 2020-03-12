@@ -61,6 +61,13 @@ def randomStringDigits(length):     # Code Generation for class ids
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join(random.choice(lettersAndDigits) for i in range(length))
 
+class getInfo(Resource):
+    def get(self, userid):
+        info = mongo.db.users.find_one({'_id': userid})
+        if(info != None):
+            return info
+        return 200
+
 class registerUser(Resource):
     def post(self):
         parser = reqparse.RequestParser()
@@ -267,3 +274,4 @@ api.add_resource(answer, '/answer')
 api.add_resource(report, '/report/<string:user>/<string:className>')
 api.add_resource(verifyUser, '/validate/tokensignin/<string:idtoken>')
 api.add_resource(registerUser, '/registerUser')
+api.add_resource(getInfo, '/userInfo/<string:userid>')

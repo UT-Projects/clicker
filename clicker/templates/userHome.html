@@ -13,6 +13,14 @@
     function onLoad() {
       gapi.load('auth2', function() {
         gapi.auth2.init();
+        var auth2 = gapi.auth2.getAuthInstance();
+        var profile = auth2.currentUser.get().getBasicProfile();
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:5000/userInfo/' + profile.getId());
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+        };
+        xhr.send();
       });
     }
   </script>
