@@ -163,20 +163,23 @@ class deleteUser(Resource):
 
     def deleteUser(self, userid, username):     # Delete the user entirely from the backend
         try:
-            ids = mongo.db.mapping.find_one({"_id":username})['Classes']
+            ids = mongo.db.mapping.find_one({"_id":username})
+            if(ids != None):
+                ids = ids['Classes']
             results = mongo.db.mapping.delete_one({"_id": username})
             results = mongo.db.classes.find({"user": username})
             for result in results:
                 data = mongo.db.classes.delete_one({"_id": result['_id']})
             mongo.db.ids.update({"_id": 0}, {"$pull": {"names": username}})
-            for tag in ids.keys():
-                mongo.db.ids.update({"_id": 0}, {"$pull": {"ids": tag}})
+            if(ids != None):
+                for tag in ids.keys():
+                    mongo.db.ids.update({"_id": 0}, {"$pull": {"ids": tag}})
             mongo.db.users.delete_one({"_id": userid})
             return 202
         except Exception as e:
+            print("Error:: ", flush=True)
             print(e, flush=True)
-            return str(e)
-        return 200
+            return 200
 
 class deleteClass(Resource):
     def post(self):
