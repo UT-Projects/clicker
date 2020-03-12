@@ -1,0 +1,22 @@
+<html>
+<head>
+  <meta name="google-signin-client_id" content="956189670156-ultqqa3u01oc7t4756nsgis00o6fob6i.apps.googleusercontent.com">
+</head>
+<body>
+  <script>
+    window.onload = function() {
+        document.getElementById("settings").onclick = function() {
+        window.location.href = '/userSettings'
+        };
+    }
+
+    function onLoad() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init();
+      });
+    }
+  </script>
+  <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+  <button type=button id="settings">User Settings</button>
+</body>
+</html>

@@ -25,7 +25,7 @@
       xhr.open('POST', 'http://localhost:5000/registerUser');
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = function() {
-        window.location.href = '/poll'
+        window.location.href = '/userHome'
       };
       var data = JSON.stringify({'_id': profile.getId(),'type': type, 'name': profile.getName()})
       xhr.send(data);

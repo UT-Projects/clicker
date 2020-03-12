@@ -48,6 +48,14 @@ def classes():
 def client():
     return render_template("client.html")
 
+@app.route("/userHome")
+def userHome():
+    return render_template("userHome.html")
+
+@app.route('/userSettings')
+def userSettings():
+    return render_template("settings.html")
+
 def randomStringDigits(length):     # Code Generation for class ids 
     """Generate a random string of letters and digits """
     lettersAndDigits = string.ascii_letters + string.digits
@@ -63,7 +71,7 @@ class registerUser(Resource):
         mongo.db.users.insert_one(args)
         return 201
 
-class userManagement(Resource):
+class verifyUser(Resource):
     def get(self, idtoken):
         owd = path.dirname(__file__)
         credFile = owd[:owd.rfind("clicker")] + "credentials.json"
@@ -79,13 +87,12 @@ class userManagement(Resource):
             # ID token is valid. Get the user's Google Account ID from the decoded token.
             userid = idinfo['sub']
             test = self.checkUser(userid)
-            print(userid, flush=True)
             # print(mongo.db.users.find_one({"_id": userid}), flush=True)
             if(mongo.db.users.find_one({"_id": userid}) == None):
                 return jsonify(dict(redirect='register'))
             else:
                 # return mongo.db.users.find({"_id": userid})
-                return jsonify(dict(redirect='poll'))
+                return jsonify(dict(redirect='userHome'))
         except Exception as e:
             print(e)
             # Invalid token
@@ -146,11 +153,14 @@ class createClass(Resource):        # Endpoint creates a class object in the db
 class deleteUser(Resource):
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('user', required=True)
+        parser.add_argument('userid', required=True)
         args = parser.parse_args()
-        return self.deleteUser(args['user'])
+        print(args['userid'], flush=True)
+        username = mongo.db.users.find_one({'_id': args['userid']})['name']
+        print(username, flush=True)
+        return self.deleteUser(args['userid'], username)
 
-    def deleteUser(self, username):     # Delete the user entirely from the backend
+    def deleteUser(self, userid, username):     # Delete the user entirely from the backend
         try:
             ids = mongo.db.mapping.find_one({"_id":username})['Classes']
             results = mongo.db.mapping.delete_one({"_id": username})
@@ -160,7 +170,10 @@ class deleteUser(Resource):
             mongo.db.ids.update({"_id": 0}, {"$pull": {"names": username}})
             for tag in ids.keys():
                 mongo.db.ids.update({"_id": 0}, {"$pull": {"ids": tag}})
+            mongo.db.users.delete_one({"_id": userid})
+            return 202
         except Exception as e:
+            print(e, flush=True)
             return str(e)
         return 200
 
@@ -248,5 +261,5 @@ api.add_resource(deleteClass, '/deleteClass')
 api.add_resource(pollStatus, '/pollStatus/<string:user>/<string:className>')
 api.add_resource(answer, '/answer')
 api.add_resource(report, '/report/<string:user>/<string:className>')
-api.add_resource(userManagement, '/validate/tokensignin/<string:idtoken>')
+api.add_resource(verifyUser, '/validate/tokensignin/<string:idtoken>')
 api.add_resource(registerUser, '/registerUser')

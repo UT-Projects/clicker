@@ -1,0 +1,49 @@
+<html>
+<head>
+  <meta name="google-signin-client_id" content="956189670156-ultqqa3u01oc7t4756nsgis00o6fob6i.apps.googleusercontent.com">
+</head>
+<body>
+  <script>
+    window.onload = function() {
+        document.getElementById("signOut").onclick = function() {
+        signOut();
+        };
+
+        document.getElementById("delete").onclick = function() {
+        signOut();
+        deleteAcc();
+        };
+    }
+
+    function deleteAcc() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        var profile = auth2.currentUser.get().getBasicProfile();
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:5000/deleteUser');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+        window.location.href = '/home'
+        };
+        var data = JSON.stringify({'userid': profile.getId()})
+        xhr.send(data);
+    }
+
+    function signOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+      });
+      window.location = '/home'
+    }
+
+    function onLoad() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init();
+      });
+    }
+  </script>
+  <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+  <button type=button id="signOut">Sign out</button>
+  <button type=button id="delete">Delete Account</button>
+</body>
+</html>
