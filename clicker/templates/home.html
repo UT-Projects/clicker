@@ -23,6 +23,9 @@
 		console.log('Signed in as: ' + xhr.responseText);
 		var data = xhr.responseText
 		var json = JSON.parse(data);
+		if(json.logout == 'True'){
+			signOut()
+		}
 		window.location.href = json.redirect;
 		};
 		xhr.send();

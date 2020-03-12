@@ -94,9 +94,10 @@ class verifyUser(Resource):
                 # return mongo.db.users.find({"_id": userid})
                 return jsonify(dict(redirect='userHome'))
         except Exception as e:
-            print(e)
+            print("Error:: ", flush=True)
+            print(e, flush=True)
             # Invalid token
-            return e
+            return jsonify(dict(redirect='home', logout='True'))
     
     def checkUser(self, userid):
         if mongo.db.users.find({"_id": userid}) != None:
